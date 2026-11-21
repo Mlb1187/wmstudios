@@ -148,9 +148,9 @@ function viewPortal(d){
   document.getElementById('lo').onclick=async()=>{const s=ses;save(null);viewEmail();try{await api('salir',s)}catch(e){}};
   const courses=d.courses||[];
   app.innerHTML=`<section class="hero"><p class="eyebrow">Portal de alumnos</p><h1>Hola, ${esc(first)}</h1>
-    <p class="muted" style="margin:0">Aquí está el material de las clases que ya viste. Cada clase nueva se abre después de verla con tu profesor.</p></section>`+
+    <p class="muted" style="margin:0">${d.admin?'Vista de administrador: ves todos los cursos y todo el material, tal como lo verá cada alumno al avanzar.':'Aquí está el material de las clases que ya viste. Cada clase nueva se abre después de verla con tu profesor.'}</p></section>`+
     courses.map(c=>{const pct=c.total?Math.round(c.hasta/c.total*100):0;
-      return `<section class="course"><div class="course-head"><p class="eyebrow">Tu curso</p><h2>${esc(c.course)}</h2>
+      return `<section class="course"><div class="course-head"><p class="eyebrow">${d.admin?'Curso':'Tu curso'}</p><h2>${esc(c.course)}</h2>
         <div class="prog"><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${c.total}" aria-valuenow="${c.hasta}" aria-label="Avance del curso"><i style="width:${pct}%"></i></div><span class="muted" style="font-size:14px">${c.hasta} de ${c.total} clases vistas</span></div></div>
         ${(c.material||[]).length?`<div class="cls"><div class="body"><p class="lbl">Material del curso</p><div class="mats">${c.material.map(m=>`<a class="mat" href="${esc(matHref(m.url))}"${matAttrs(m.url)}><span class="ic">${kindOf(m.url)}</span><span>${esc(m.title)}</span></a>`).join('')}</div></div></div>`:''}
         ${c.hasta?'':'<div class="box">El material de cada clase aparecerá aquí después de verla.</div>'}
