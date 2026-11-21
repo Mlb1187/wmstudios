@@ -139,7 +139,27 @@ footer nav a:hover{color:var(--fg)}
 .wa-float{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:25;width:58px;height:58px;border-radius:50%;background:var(--gold);display:grid;place-items:center;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .wa-float svg{width:28px;height:28px}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+/* ---------- movimiento 3D ---------- */
+.stage{perspective:1200px;position:relative;z-index:1}
+.desk{transform-style:preserve-3d;transform:rotateX(var(--rx,12deg)) rotateY(var(--ry,-12deg));will-change:transform;box-shadow:0 50px 90px -30px rgba(0,0,0,.9),0 0 0 1px rgba(196,154,108,.06),inset 0 1px 0 rgba(255,255,255,.06);background:linear-gradient(160deg,#1b1b1b,#111 60%)}
+.desk::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(420px circle at var(--gx,30%) var(--gy,0%),rgba(196,154,108,.16),transparent 60%)}
+.desk::after{content:"";position:absolute;left:8%;right:8%;bottom:-38px;height:30px;border-radius:50%;background:radial-gradient(closest-side,rgba(196,154,108,.22),transparent);filter:blur(8px);transform:translateZ(-60px)}
+.track{transform-style:preserve-3d}
+.cap{transform:translateZ(22px);transition:top 1.6s cubic-bezier(.16,1,.3,1)}
+.strip:hover .cap{filter:brightness(1.25)}
+.meter{position:absolute;right:4px;bottom:0;width:4px;height:100%;border-radius:3px;background:var(--surface-2);overflow:hidden;transform:translateZ(6px)}
+.meter i{position:absolute;left:0;right:0;bottom:0;height:100%;background:linear-gradient(to top,#5d4a35 0%,var(--gold) 70%,#f4e2c8 100%);transform-origin:bottom;transform:scaleY(var(--lv,.3));transition:transform .12s linear}
+.courses,.how,.two{perspective:1100px}
+.course,.card{transform-style:preserve-3d;transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .3s;position:relative}
+.course::after,.card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(360px circle at var(--gx,50%) var(--gy,50%),rgba(196,154,108,.14),transparent 60%)}
+.course:hover,.card:hover{border-color:rgba(196,154,108,.45)}
+.course:hover::after,.card:hover::after{opacity:1}
+.js .rv{opacity:0;transform:translateY(46px) rotateX(14deg);transform-origin:50% 100%}
+.js .rv.in{opacity:1;transform:none;transition:opacity .9s ease,transform 1.1s cubic-bezier(.16,1,.3,1);transition-delay:var(--d,0s)}
+.diag{will-change:transform}
+@media (prefers-reduced-motion:reduce){.desk{transform:none}.cap{transition:none}.js .rv{opacity:1;transform:none}}
 </style>
+<script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
 <header><div class="wrap">
@@ -160,15 +180,15 @@ footer nav a:hover{color:var(--fg)}
         <a class="btn" href="#cursos">Ver los cursos</a>
       </div>
     </div>
-    <div class="desk" role="img" aria-label="Seis canales de consola, uno por cada curso">
-      <a class="strip on" href="#c1" aria-label="Producción Musical Básico"><div class="track"><div class="scale" aria-hidden="true"><span>+10</span><span>0</span><span>−10</span><span>−20</span><span>−40</span><span>∞</span></div><div class="cap" style="top:28px"></div></div><span class="ch">CH 01</span></a>
-      <a class="strip" href="#c2" aria-label="Producción Musical Intermedio"><div class="track"><div class="cap" style="top:60px"></div></div><span class="ch">CH 02</span></a>
-      <a class="strip" href="#c3" aria-label="Audio en Vivo Básico"><div class="track"><div class="cap" style="top:96px"></div></div><span class="ch">CH 03</span></a>
-      <a class="strip" href="#c4" aria-label="Consola Digital en Vivo"><div class="track"><div class="cap" style="top:48px"></div></div><span class="ch">CH 04</span></a>
-      <a class="strip" href="#c5" aria-label="Consola Behringer WING"><div class="track"><div class="cap" style="top:120px"></div></div><span class="ch">CH 05</span></a>
-      <a class="strip" href="#c6" aria-label="Consola X32 / M32"><div class="track"><div class="cap" style="top:80px"></div></div><span class="ch">CH 06</span></a>
+    <div class="stage"><div class="desk" role="img" aria-label="Seis canales de consola, uno por cada curso">
+      <a class="strip on" href="#c1" aria-label="Producción Musical Básico"><div class="track"><div class="scale" aria-hidden="true"><span>+10</span><span>0</span><span>−10</span><span>−20</span><span>−40</span><span>∞</span></div><span class="meter" aria-hidden="true"><i></i></span><div class="cap" style="top:28px"></div></div><span class="ch">CH 01</span></a>
+      <a class="strip" href="#c2" aria-label="Producción Musical Intermedio"><div class="track"><span class="meter" aria-hidden="true"><i></i></span><div class="cap" style="top:60px"></div></div><span class="ch">CH 02</span></a>
+      <a class="strip" href="#c3" aria-label="Audio en Vivo Básico"><div class="track"><span class="meter" aria-hidden="true"><i></i></span><div class="cap" style="top:96px"></div></div><span class="ch">CH 03</span></a>
+      <a class="strip" href="#c4" aria-label="Consola Digital en Vivo"><div class="track"><span class="meter" aria-hidden="true"><i></i></span><div class="cap" style="top:48px"></div></div><span class="ch">CH 04</span></a>
+      <a class="strip" href="#c5" aria-label="Consola Behringer WING"><div class="track"><span class="meter" aria-hidden="true"><i></i></span><div class="cap" style="top:120px"></div></div><span class="ch">CH 05</span></a>
+      <a class="strip" href="#c6" aria-label="Consola X32 / M32"><div class="track"><span class="meter" aria-hidden="true"><i></i></span><div class="cap" style="top:80px"></div></div><span class="ch">CH 06</span></a>
       <p>6 cursos · 1 estudio · tu sonido a 0 dB</p>
-    </div>
+    </div></div>
   </div>
 </section>
 
@@ -180,61 +200,61 @@ footer nav a:hover{color:var(--fg)}
 </div></section>
 
 <section class="block" id="cursos"><div class="wrap">
-  <div class="head"><p class="eyebrow">Cursos</p><h2>Elige tu canal</h2><p class="lead">Dos caminos: la producción musical en la computadora y el sonido en vivo en la consola. Empiezas desde cero o desde donde estés.</p></div>
+  <div class="rv head"><p class="eyebrow">Cursos</p><h2>Elige tu canal</h2><p class="lead">Dos caminos: la producción musical en la computadora y el sonido en vivo en la consola. Empiezas desde cero o desde donde estés.</p></div>
   <div class="courses">
-    <article class="course" id="c1"><div class="top"><span class="num">CH 01</span><span class="tag">6 meses</span></div><h3>Producción Musical · Básico</h3>
+    <article class="rv course" id="c1"><div class="top"><span class="num">CH 01</span><span class="tag">6 meses</span></div><h3>Producción Musical · Básico</h3>
       <p>Desde cero hasta tu primera canción terminada: el DAW, ritmo, MIDI, grabación, edición, mezcla y master.</p><p class="grad">Egresas como <b>Productor Musical</b></p>
       <a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Producci%C3%B3n%20Musical%20B%C3%A1sico" target="_blank" rel="noopener">Preguntar por este curso →</a></article>
-    <article class="course" id="c2"><div class="top"><span class="num">CH 02</span><span class="tag">6 meses</span></div><h3>Producción Musical · Intermedio</h3>
+    <article class="rv course" id="c2"><div class="top"><span class="num">CH 02</span><span class="tag">6 meses</span></div><h3>Producción Musical · Intermedio</h3>
       <p>Para quien ya produce y quiere sonar profesional: buses, procesamiento avanzado, síntesis, mezcla y masterización con identidad propia.</p><p class="grad">Egresas como <b>Productor Musical · Nivel Intermedio</b></p>
       <a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Producci%C3%B3n%20Musical%20Intermedio" target="_blank" rel="noopener">Preguntar por este curso →</a></article>
-    <article class="course" id="c3"><div class="top"><span class="num">CH 03</span><span class="tag">3 meses · 12 clases</span></div><h3>Audio en Vivo · Básico</h3>
+    <article class="rv course" id="c3"><div class="top"><span class="num">CH 03</span><span class="tag">3 meses · 12 clases</span></div><h3>Audio en Vivo · Básico</h3>
       <p>Las bases del sonido en tarima: micrófonos, cables, consola analógica, monitores, feedback y la prueba de sonido de una banda.</p><p class="grad">Egresas como <b>Asistente de Sonido en Vivo</b></p>
       <a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Audio%20en%20Vivo%20B%C3%A1sico" target="_blank" rel="noopener">Preguntar por este curso →</a></article>
-    <article class="course" id="c4"><div class="top"><span class="num">CH 04</span><span class="tag">6 meses</span></div><h3>Consola Digital en Vivo</h3>
+    <article class="rv course" id="c4"><div class="top"><span class="num">CH 04</span><span class="tag">6 meses</span></div><h3>Consola Digital en Vivo</h3>
       <p>Opera consolas digitales Behringer y Midas en 4 fases: fundamentos, mezcla, sistemas y producción de un show.</p><p class="grad">Egresas como <b>Técnico en Consola Digital en Vivo</b></p>
       <a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Consola%20Digital%20en%20Vivo" target="_blank" rel="noopener">Preguntar por este curso →</a></article>
-    <article class="course" id="c5"><div class="top"><span class="num">CH 05</span><span class="tag">3 meses · 12 clases</span></div><h3>Consola Behringer WING</h3>
+    <article class="rv course" id="c5"><div class="top"><span class="num">CH 05</span><span class="tag">3 meses · 12 clases</span></div><h3>Consola Behringer WING</h3>
       <p>Dominio completo de la WING: ruteo, monitores, efectos, escenas, grabación y virtual soundcheck.</p><p class="grad">Egresas como <b>Operador de Consola Behringer WING</b></p>
       <a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Consola%20WING" target="_blank" rel="noopener">Preguntar por este curso →</a></article>
-    <article class="course" id="c6"><div class="top"><span class="num">CH 06</span><span class="tag">3 meses · 12 clases</span></div><h3>Consola X32 / Midas M32</h3>
+    <article class="rv course" id="c6"><div class="top"><span class="num">CH 06</span><span class="tag">3 meses · 12 clases</span></div><h3>Consola X32 / Midas M32</h3>
       <p>Una de las consolas más usadas en tarima, de punta a punta: canal, mix buses, efectos, escenas, grabación y prácticas de show.</p><p class="grad">Egresas como <b>Operador de Consola X32 / M32</b></p>
       <a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Consola%20X32%20%2F%20M32" target="_blank" rel="noopener">Preguntar por este curso →</a></article>
   </div>
   <div class="routes">
-    <div class="route"><p class="eyebrow">Ruta de producción</p><div class="path">Básico <i>→</i> Intermedio</div></div>
-    <div class="route"><p class="eyebrow">Ruta de sonido en vivo</p><div class="path">Audio en Vivo <i>→</i> Consola Digital <i>→</i> WING o X32 / M32</div></div>
+    <div class="rv route"><p class="eyebrow">Ruta de producción</p><div class="path">Básico <i>→</i> Intermedio</div></div>
+    <div class="rv route"><p class="eyebrow">Ruta de sonido en vivo</p><div class="path">Audio en Vivo <i>→</i> Consola Digital <i>→</i> WING o X32 / M32</div></div>
   </div>
 </div></section>
 
 <section class="block" id="clases"><div class="wrap">
-  <div class="head"><p class="eyebrow">Las clases</p><h2>Aprender haciendo</h2><p class="lead">Cada clase tiene teoría corta, práctica con el equipo, una tarea para la semana y la revisión de tu avance.</p></div>
+  <div class="rv head"><p class="eyebrow">Las clases</p><h2>Aprender haciendo</h2><p class="lead">Cada clase tiene teoría corta, práctica con el equipo, una tarea para la semana y la revisión de tu avance.</p></div>
   <div class="how">
-    <div><h3>1 a 1 y a tu ritmo</h3><p>El profesor trabaja solo contigo, una hora a la semana, en el horario que elijas.</p></div>
-    <div><h3>Equipo real</h3><p>Practicas con lo que vas a encontrar en un estudio y en una tarima: DAW, monitores, micrófonos y consolas.</p></div>
-    <div><h3>Evaluación por módulo</h3><p>Cada módulo cierra con un reto práctico y preguntas de teoría. Avanzas con nota y recibes tu certificado al egresar.</p></div>
-    <div><h3>Tu material en línea</h3><p>En el portal de alumnos encuentras el material de cada clase que ya viste: guías, glosario y enlaces.</p></div>
+    <div class="rv"><h3>1 a 1 y a tu ritmo</h3><p>El profesor trabaja solo contigo, una hora a la semana, en el horario que elijas.</p></div>
+    <div class="rv"><h3>Equipo real</h3><p>Practicas con lo que vas a encontrar en un estudio y en una tarima: DAW, monitores, micrófonos y consolas.</p></div>
+    <div class="rv"><h3>Evaluación por módulo</h3><p>Cada módulo cierra con un reto práctico y preguntas de teoría. Avanzas con nota y recibes tu certificado al egresar.</p></div>
+    <div class="rv"><h3>Tu material en línea</h3><p>En el portal de alumnos encuentras el material de cada clase que ya viste: guías, glosario y enlaces.</p></div>
   </div>
 </div></section>
 
 <section class="block" id="horario"><div class="wrap">
-  <div class="head"><p class="eyebrow">Horario e inversión</p><h2>Cuándo y cuánto</h2></div>
+  <div class="rv head"><p class="eyebrow">Horario e inversión</p><h2>Cuándo y cuánto</h2></div>
   <div class="two">
-    <div class="card"><h3>Horario del estudio</h3>
+    <div class="rv card"><h3>Horario del estudio</h3>
       <table class="sched"><tbody>
         <tr><td>Martes a viernes</td><td>2:00 – 6:00 pm</td></tr>
         <tr><td>Sábados</td><td>9:00 am – 3:00 pm</td></tr>
         <tr class="off"><td>Domingo y lunes</td><td>Cerrado</td></tr>
       </tbody></table>
       <ul><li>Tu clase queda fija en un día y una hora a la semana.</li><li>Puedes reprogramar hasta 2 clases al mes, en los horarios libres.</li></ul></div>
-    <div class="card"><h3>Mensualidad</h3>
+    <div class="rv card"><h3>Mensualidad</h3>
       <div class="price"><div><b>$100</b><span>Pronto pago, hasta el día 5</span></div><div><b class="n">$120</b><span>Después del día 5</span></div></div>
       <ul><li>Incluye 4 clases de 1 hora (una por semana) y tu material en el portal.</li><li>Con más de 1 hora a la semana tienes 12 % de descuento.</li><li>Pagas en dólares o en bolívares a la tasa Euro BCV del día: efectivo, Zelle, Binance, pago móvil o transferencia.</li></ul></div>
   </div>
 </div></section>
 
 <section class="block" id="preguntas"><div class="wrap">
-  <div class="head"><p class="eyebrow">Preguntas frecuentes</p><h2>Antes de empezar</h2></div>
+  <div class="rv head"><p class="eyebrow">Preguntas frecuentes</p><h2>Antes de empezar</h2></div>
   <div class="faq">
     <details><summary>¿Necesito experiencia previa?</summary><p>No. Producción Musical Básico y Audio en Vivo Básico empiezan desde cero. Si ya tienes experiencia, en una conversación vemos en qué curso o módulo te conviene empezar.</p></details>
     <details><summary>¿Las clases son grupales?</summary><p>No, son 1 a 1: el profesor trabaja solo contigo, así avanzas a tu ritmo y resuelves tus propias dudas.</p></details>
@@ -245,7 +265,7 @@ footer nav a:hover{color:var(--fg)}
 </div></section>
 
 <section class="block" id="ubicacion"><div class="wrap">
-  <div class="head"><p class="eyebrow">Ubicación</p></div>
+  <div class="rv head"><p class="eyebrow">Ubicación</p></div>
   <div class="place">
     <address>Av. 20 con 5 de Julio<br>Maracaibo, Zulia</address>
     <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Av.%2020%20con%205%20de%20Julio%2C%20Maracaibo%2C%20Venezuela" target="_blank" rel="noopener">Abrir en Google Maps</a>
@@ -268,5 +288,34 @@ footer nav a:hover{color:var(--fg)}
 </div></footer>
 
 <a class="wa-float" href="https://wa.me/584149668456?text=Hola%20WM%20Studios%2C%20quiero%20informaci%C3%B3n" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"><svg viewBox="0 0 24 24" fill="#0A0A0A" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 2s.9 2.3 1 2.5c.1.2 1.7 2.6 4.1 3.6 1.5.7 2.1.7 2.9.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3Z"/></svg></a>
+<script>
+(function(){
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els=[].slice.call(document.querySelectorAll('.rv'));
+  if(reduce||!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});if(reduce)return}
+  else{els.forEach(function(e){var sib=[].slice.call(e.parentNode.children).filter(function(x){return x.classList.contains('rv')});e.style.setProperty('--d',(Math.min(sib.indexOf(e),5)*0.08)+'s')});
+    var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12});els.forEach(function(e){io.observe(e)})}
+  /* consola: inclinación con el puntero, el giroscopio o un vaivén suave */
+  var desk=document.querySelector('.desk');var tx=-12,ty=12,cx=-12,cy=12,last=0;
+  function aim(px,py){ty=12-py*14;tx=-12+px*22}
+  window.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;last=Date.now();aim(e.clientX/innerWidth-.5,e.clientY/innerHeight-.5);
+    var r=desk.getBoundingClientRect();desk.style.setProperty('--gx',((e.clientX-r.left)/r.width*100)+'%');desk.style.setProperty('--gy',((e.clientY-r.top)/r.height*100)+'%')},{passive:true});
+  window.addEventListener('deviceorientation',function(e){if(e.gamma==null)return;last=Date.now();aim(Math.max(-1,Math.min(1,e.gamma/30))*.5,Math.max(-1,Math.min(1,(e.beta-45)/30))*.5)},{passive:true});
+  (function loop(t){if(Date.now()-last>2500){tx=-12+Math.sin(t/2600)*7;ty=12+Math.cos(t/3100)*4}
+    cx+=(tx-cx)*.06;cy+=(ty-cy)*.06;desk.style.setProperty('--ry',cx.toFixed(2)+'deg');desk.style.setProperty('--rx',cy.toFixed(2)+'deg');
+    var d=document.querySelector('.hero .diag');if(d)d.style.transform='translateY('+(scrollY*.25)+'px) rotate(28deg)';requestAnimationFrame(loop)})(0);
+  /* faders motorizados: suben al cargar y luego se mueven un poco, como una mezcla viva */
+  var caps=[].slice.call(desk.querySelectorAll('.cap')).map(function(c){var t=parseFloat(c.style.top)||0;c.dataset.t=t;c.style.transition='none';c.style.top=(c.parentNode.clientHeight-c.offsetHeight)+'px';return c});
+  requestAnimationFrame(function(){requestAnimationFrame(function(){caps.forEach(function(c,i){c.style.transition='';setTimeout(function(){c.style.top=c.dataset.t+'px'},150+i*120)})})});
+  setTimeout(function(){setInterval(function(){caps.forEach(function(c,i){if(i===0)return;c.style.top=(+c.dataset.t+(Math.random()*16-8))+'px'})},2600)},2400);
+  var meters=[].slice.call(desk.querySelectorAll('.meter i'));var lv=meters.map(function(){return .3});
+  setInterval(function(){meters.forEach(function(m,i){var cap=caps[i];var base=1-(parseFloat(cap.style.top)||0)/(cap.parentNode.clientHeight||200);var tgt=Math.max(.05,Math.min(1,base*.85+Math.random()*.25-.08));lv[i]+=(tgt-lv[i])*(tgt>lv[i]?.8:.25);m.style.setProperty('--lv',lv[i].toFixed(3))})},110);
+  /* tarjetas en relieve */
+  [].forEach.call(document.querySelectorAll('.course,.card'),function(el){
+    el.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+      el.style.transform='rotateY('+((x-.5)*10).toFixed(2)+'deg) rotateX('+((.5-y)*10).toFixed(2)+'deg) translateZ(10px)';el.style.setProperty('--gx',x*100+'%');el.style.setProperty('--gy',y*100+'%')});
+    el.addEventListener('pointerleave',function(){el.style.transform=''})});
+})();
+</script>
 </body>
 </html>
