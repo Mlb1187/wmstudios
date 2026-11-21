@@ -58,7 +58,7 @@ label{font-size:14px;font-weight:600;color:var(--muted)}
 .mats{display:flex;flex-direction:column;gap:8px}
 .mat{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--raised2);text-decoration:none;color:var(--ink);font-weight:600}
 .mat:hover{background:#262626}
-.mat .ic{flex:none;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;background:var(--gold);color:var(--gold-ink);font-size:11px;font-weight:800;letter-spacing:.04em}
+.mat .ic{flex:none;min-width:34px;padding:0 4px;width:auto;height:34px;border-radius:8px;display:grid;place-items:center;background:var(--gold);color:var(--gold-ink);font-size:11px;font-weight:800;letter-spacing:.04em}
 .mat span:last-child{min-width:0;overflow-wrap:anywhere}
 .lbl{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:0 0 6px}
 ul.pts{margin:0;padding-left:20px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
@@ -78,15 +78,18 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-si
   <main id="app"><div class="spin" role="status" aria-label="Cargando"></div></main>
   <footer><span>WM Studios · Av. 20 con 5 de Julio, Maracaibo</span><span id="out"></span></footer>
 </div>
+<script src="config.js"></script>
 <script>
-/* Pega aquí la URL de la aplicación web de Apps Script (termina en /exec). */
-const API_URL='PEGA_AQUI_LA_URL_DE_APPS_SCRIPT';
+const API_URL=window.WM_API||'PEGA_';
 
 const app=document.getElementById('app');
 const KEY='wm-portal';
 let ses=null;try{ses=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function save(v){ses=v;try{v?localStorage.setItem(KEY,JSON.stringify(v)):localStorage.removeItem(KEY)}catch(e){}}
+function matHref(u){u=String(u||'');return u.startsWith('doc:')?'ver/index.html#'+encodeURIComponent(u.slice(4)):safeUrl(u)}
+function matAttrs(u){return String(u||'').startsWith('doc:')?'':' target="_blank" rel="noopener"'}
+function kindOf(u){return String(u||'').startsWith('doc:')?'GUÍA':kind(u)}
 function safeUrl(u){try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:'#'}catch(e){return '#'}}
 
 async function api(action,body){
@@ -133,7 +136,7 @@ function clsCard(c,open){
   const ms=c.material||[];
   return `<details class="cls"${open?' open':''}><summary><span class="n">${num}</span><span class="t">${esc(c.title)}</span><span class="chip ${ms.length?'has':''}">${ms.length?ms.length+(ms.length>1?' materiales':' material'):'Vista'}</span></summary>
   <div class="body">
-    ${ms.length?`<div><p class="lbl">Material de apoyo</p><div class="mats">${ms.map(m=>`<a class="mat" href="${esc(safeUrl(m.url))}" target="_blank" rel="noopener"><span class="ic">${kind(m.url)}</span><span>${esc(m.title)}</span></a>`).join('')}</div></div>`:''}
+    ${ms.length?`<div><p class="lbl">Material de apoyo</p><div class="mats">${ms.map(m=>`<a class="mat" href="${esc(matHref(m.url))}"${matAttrs(m.url)}><span class="ic">${kindOf(m.url)}</span><span>${esc(m.title)}</span></a>`).join('')}</div></div>`:''}
     ${(c.points||[]).length?`<div><p class="lbl">Lo que vimos</p><ul class="pts">${c.points.map(p=>`<li>${lead(p)}</li>`).join('')}</ul></div>`:''}
     ${c.homework?`<div><p class="lbl">Tarea</p><div class="box">${esc(c.homework)}</div></div>`:''}
   </div></details>`;
@@ -149,7 +152,7 @@ function viewPortal(d){
     courses.map(c=>{const pct=c.total?Math.round(c.hasta/c.total*100):0;
       return `<section class="course"><div class="course-head"><p class="eyebrow">Tu curso</p><h2>${esc(c.course)}</h2>
         <div class="prog"><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${c.total}" aria-valuenow="${c.hasta}" aria-label="Avance del curso"><i style="width:${pct}%"></i></div><span class="muted" style="font-size:14px">${c.hasta} de ${c.total} clases vistas</span></div></div>
-        ${(c.material||[]).length?`<div class="cls"><div class="body"><p class="lbl">Material del curso</p><div class="mats">${c.material.map(m=>`<a class="mat" href="${esc(safeUrl(m.url))}" target="_blank" rel="noopener"><span class="ic">${kind(m.url)}</span><span>${esc(m.title)}</span></a>`).join('')}</div></div></div>`:''}
+        ${(c.material||[]).length?`<div class="cls"><div class="body"><p class="lbl">Material del curso</p><div class="mats">${c.material.map(m=>`<a class="mat" href="${esc(matHref(m.url))}"${matAttrs(m.url)}><span class="ic">${kindOf(m.url)}</span><span>${esc(m.title)}</span></a>`).join('')}</div></div></div>`:''}
         ${c.hasta?'':'<div class="box">El material de cada clase aparecerá aquí después de verla.</div>'}
         ${c.classes.map(x=>clsCard(x,x.n===c.hasta)).join('')}</section>`}).join('')+
     (d.updatedAt?`<p class="muted" style="font-size:13px;margin-top:28px">Actualizado el ${esc(new Date(d.updatedAt).toLocaleDateString('es-VE',{day:'numeric',month:'long'}))}.</p>`:'');

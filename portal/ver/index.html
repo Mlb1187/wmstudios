@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Material de alumnos · WM Studios</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0A0A">
+<style>
+html,body{margin:0;height:100%;background:#0A0A0A;color:#F4F2EE;font:500 15px/1.5 Inter,system-ui,Arial,sans-serif}
+.bar{position:fixed;inset:0 0 auto;height:48px;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;background:#0A0A0A;border-bottom:1px solid #2E2E2E}
+.bar a{color:#C49A6C;text-decoration:none;font-weight:700}
+.bar span{color:#A3A3A3;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+iframe{position:fixed;top:48px;left:0;width:100%;height:calc(100% - 48px);border:0;background:#0A0A0A}
+.wm{position:fixed;right:12px;bottom:10px;z-index:3;pointer-events:none;font-size:12px;color:rgba(244,242,238,.35)}
+.msg{max-width:440px;margin:0 auto;padding:120px 16px;text-align:center;display:flex;flex-direction:column;gap:16px;align-items:center}
+.msg a{color:#0A0A0A;background:#C49A6C;border-radius:999px;padding:12px 22px;text-decoration:none;font-weight:700}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid #2E2E2E;border-top-color:#C49A6C;animation:r .8s linear infinite;margin:120px auto}
+@keyframes r{to{transform:rotate(1turn)}}
+</style>
+</head>
+<body>
+<div class="bar"><a href="../">← Mi portal</a><span id="who"></span></div>
+<div id="app"><div class="spin" role="status" aria-label="Cargando"></div></div>
+<script src="../config.js"></script>
+<script>
+(async function(){
+  const app=document.getElementById('app');
+  const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const out=m=>{app.innerHTML=`<div class="msg"><p>${esc(m)}</p><a href="../">Ir a mi portal</a></div>`};
+  let ses=null;try{ses=JSON.parse(localStorage.getItem('wm-portal')||'null')}catch(e){}
+  const id=decodeURIComponent(location.hash.slice(1));
+  if(!ses||!ses.token)return out('Este material es exclusivo para alumnos activos. Entra a tu portal con tu correo y tu código.');
+  if(!/^[a-z0-9-]{1,60}$/.test(id))return out('Material no encontrado.');
+  const API=window.WM_API||'';if(!API||API.startsWith('PEGA_'))return out('El portal aún no está conectado.');
+  document.getElementById('who').textContent=ses.email;
+  try{
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'doc',email:ses.email,token:ses.token,id})});
+    const d=await r.json();
+    if(!d.ok){if(d.auth===false){try{localStorage.removeItem('wm-portal')}catch(e){}}return out(d.error||'No pudimos abrir el material.')}
+    const f=document.createElement('iframe');f.title='Material de apoyo';
+    f.setAttribute('sandbox','allow-scripts allow-modals allow-popups allow-popups-to-escape-sandbox');
+    f.srcdoc=d.html;app.replaceChildren(f);
+    const w=document.createElement('div');w.className='wm';w.textContent='Uso exclusivo de '+ses.email;document.body.appendChild(w);
+    const t=(d.html.match(/<title>([^<]*)<\/title>/)||[])[1];if(t)document.title=t.replace(/&amp;/g,'&');
+  }catch(e){out('No pudimos conectar. Revisa tu internet e inténtalo de nuevo.')}
+})();
+</script>
+</body>
+</html>
