@@ -83,7 +83,17 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-si
 .spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:r .8s linear infinite;margin:64px auto}
 @keyframes r{to{transform:rotate(1turn)}}
 @media (max-width:520px){.cls summary{grid-template-columns:40px minmax(0,1fr)}.cls .chip{grid-column:2}}
-@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.loading{min-height:56vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:48px 0}
+.vu{display:flex;align-items:flex-end;gap:6px;height:64px}
+.vu i{display:block;width:10px;height:100%;border-radius:3px;background:linear-gradient(to top,#5d4a35,var(--gold) 65%,#f4e2c8);transform-origin:bottom;animation:vu 1.05s ease-in-out infinite}
+.vu i:nth-child(1){animation-delay:-.2s}.vu i:nth-child(2){animation-delay:-.55s;animation-duration:.9s}.vu i:nth-child(3){animation-delay:-.1s;animation-duration:1.2s}
+.vu i:nth-child(4){animation-delay:-.7s}.vu i:nth-child(5){animation-delay:-.35s;animation-duration:.95s}.vu i:nth-child(6){animation-delay:-.8s;animation-duration:1.15s}.vu i:nth-child(7){animation-delay:-.45s}
+@keyframes vu{0%,100%{transform:scaleY(.18)}30%{transform:scaleY(1)}55%{transform:scaleY(.45)}75%{transform:scaleY(.8)}}
+.loading h2{margin:0;font-family:var(--display);font-stretch:125%;font-weight:800;text-transform:uppercase;font-size:clamp(20px,4vw,28px);letter-spacing:-.01em}
+.loading .step{margin:0;color:var(--muted);font-size:15px;min-height:1.5em;transition:opacity .25s}
+.loading .who{display:flex;align-items:center;gap:10px;color:var(--ink);font-weight:600}
+.loading .who img{width:32px;height:32px;border-radius:50%}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}.vu i{animation:none;transform:scaleY(.6)}}
 </style>
 </head>
 <body>
@@ -111,6 +121,20 @@ async function api(action,body){
   if(!r.ok)throw new Error('red');return r.json();
 }
 
+/* ---------- pantalla de carga: un medidor de audio mientras se abre la sesión ---------- */
+let stepTimer=null;
+function viewLoading(title,steps,who){
+  clearInterval(stepTimer);clearTop();
+  app.innerHTML=`<section class="loading" role="status" aria-live="polite">
+    <div class="vu" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <h2>${esc(title)}</h2>${who?`<p class="who">${who.picture?`<img src="${esc(who.picture)}" alt="" referrerpolicy="no-referrer">`:''}${esc(who.label)}</p>`:''}
+    <p class="step" id="stp">${esc(steps[0]||'')}</p></section>`;
+  let k=0;const el=document.getElementById('stp');
+  if(steps.length>1)stepTimer=setInterval(()=>{if(!document.body.contains(el)){clearInterval(stepTimer);return}k=Math.min(k+1,steps.length-1);el.style.opacity=0;setTimeout(()=>{el.textContent=steps[k];el.style.opacity=1},250)},1400);
+}
+/* Datos visibles del token de Google (nombre, foto) solo para la pantalla de carga; el servidor es quien lo verifica. */
+function gInfo(cred){try{const p=JSON.parse(decodeURIComponent(escape(atob(cred.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));return {label:p.name||p.email||'',picture:p.picture||''}}catch(e){return null}}
+
 /* ---------- entrar ---------- */
 const GCID=window.WM_GOOGLE_CLIENT_ID||'';
 function clearTop(){document.getElementById('who').textContent='';document.getElementById('out').innerHTML='';document.getElementById('hbtn').innerHTML=''}
@@ -125,8 +149,9 @@ function passProblem(a,b){if(a.length<8)return 'La clave debe tener al menos 8 c
 let gisP=null;
 function gis(){if(!GCID)return Promise.reject();if(!gisP)gisP=new Promise((ok,no)=>{const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.async=true;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});return gisP}
 function googleButton(box,m){
-  gis().then(()=>{google.accounts.id.initialize({client_id:GCID,callback:async res=>{m.className='msg';m.textContent='Entrando con Google…';
-      try{const r=await api('google',{credential:res.credential});if(r.ok){save({email:r.email,token:r.token});load()}else err(m,r.error)}catch(x){err(m,'No hay conexión. Inténtalo de nuevo.')}},
+  gis().then(()=>{google.accounts.id.initialize({client_id:GCID,callback:async res=>{
+      viewLoading('Entrando con Google',['Verificando tu cuenta de Google…','Buscando tu inscripción…','Abriendo tu sesión…'],gInfo(res.credential));
+      try{const r=await api('google',{credential:res.credential});if(r.ok){save({email:r.email,token:r.token});load(true)}else viewLogin(r.error)}catch(x){viewLogin('No hay conexión. Inténtalo de nuevo.')}},
     ux_mode:'popup',cancel_on_tap_outside:true});
     google.accounts.id.renderButton(box,{theme:'filled_black',size:'large',shape:'pill',text:'signin_with',locale:'es',width:Math.min(400,box.clientWidth||320)})})
   .catch(()=>{box.innerHTML='<p class="hint">No se pudo cargar el botón de Google. Entra con tu correo y tu clave.</p>'})}
@@ -146,12 +171,12 @@ function viewLogin(msg,email){
   if(GCID)googleButton(document.getElementById('gb'),m);
   document.getElementById('fg').onclick=()=>viewRecover(em.value.trim().toLowerCase());
   f.onsubmit=async ev=>{ev.preventDefault();const e=em.value.trim().toLowerCase();if(!validEmail(e))return err(m,'Escribe un correo válido.');if(!pw.value)return err(m,'Escribe tu clave.');
-    busy(b,true,'Entrando…');m.textContent='';
-    try{const r=await api('login',{email:e,password:pw.value});
-      if(r.ok){save({email:e,token:r.token});r.mustChange?viewSetPass('must'):load();return}
+    const pass=pw.value;viewLoading('Entrando',['Verificando tu clave…','Buscando tu inscripción…','Abriendo tu sesión…'],{label:e});
+    try{const r=await api('login',{email:e,password:pass});
+      if(r.ok){save({email:e,token:r.token});r.mustChange?viewSetPass('must'):load(true);return}
       if(r.error==='Acción desconocida.'){legacyEmail(e);return}   /* servidor todavía sin actualizar */
-      err(m,r.error);busy(b,false,'Entrar');pw.select()}
-    catch(x){err(m,'No hay conexión. Inténtalo de nuevo.');busy(b,false,'Entrar')}};
+      viewLogin(r.error,e)}
+    catch(x){viewLogin('No hay conexión. Inténtalo de nuevo.',e)}};
 }
 
 /* Recuperar: código al correo + clave nueva. */
@@ -184,7 +209,7 @@ function viewRecoverCode(email){
   document.getElementById('bk').onclick=()=>viewRecover(email);
   f.onsubmit=async ev=>{ev.preventDefault();if(cd.value.length!==6)return err(m,'Escribe el código de 6 dígitos.');const pr=passProblem(p1.value,p2.value);if(pr)return err(m,pr);
     busy(b,true,'Guardando…');m.textContent='';
-    try{const r=await api('recuperar',{email,code:cd.value,password:p1.value});if(r.ok){save({email,token:r.token});load()}else{err(m,r.error);busy(b,false,'Guardar y entrar')}}
+    try{const r=await api('recuperar',{email,code:cd.value,password:p1.value});if(r.ok){save({email,token:r.token});load(true)}else{err(m,r.error);busy(b,false,'Guardar y entrar')}}
     catch(x){err(m,'No hay conexión. Inténtalo de nuevo.');busy(b,false,'Guardar y entrar')}};
 }
 
@@ -262,10 +287,11 @@ function viewPortal(d){
     (d.hasPassword===false?`<div class="note"><p><b>Entraste con Google.</b> Si quieres, crea una clave para entrar también con tu correo.</p><button id="mk">Crear clave</button></div>`:'')+
     (d.updatedAt?`<p class="muted" style="font-size:13px;margin-top:28px">Actualizado el ${esc(new Date(d.updatedAt).toLocaleDateString('es-VE',{day:'numeric',month:'long'}))}.</p>`:'');
 }
-async function load(){
+async function load(fresh){
   if(!ses||!ses.token){viewLogin();return}
-  app.innerHTML='<div class="spin" role="status" aria-label="Cargando"></div>';
-  try{const r=await api('portal',ses);if(r.ok)viewPortal(r);else if(r.mustChange)viewSetPass('must');else{if(r.auth===false)save(null);viewLogin(r.error,ses&&ses.email)}}
+  if(fresh)viewLoading('Abriendo tu portal',['Cargando tus cursos…','Preparando el material de tus clases…','Casi listo…'],null);
+  else viewLoading('Cargando',['Cargando tu material…','Casi listo…'],null);
+  try{const r=await api('portal',ses);clearInterval(stepTimer);if(r.ok)viewPortal(r);else if(r.mustChange)viewSetPass('must');else{if(r.auth===false)save(null);viewLogin(r.error,ses&&ses.email)}}
   catch(e){app.innerHTML='<div class="empty"><p>No pudimos conectar. Revisa tu internet.</p><button id="rt">Reintentar</button></div>';document.getElementById('rt').onclick=load}
 }
 if(API_URL.startsWith('PEGA_'))app.innerHTML='<div class="empty">El portal aún no está conectado.</div>';else load();
