@@ -207,13 +207,17 @@ header{background:rgba(10,10,10,.5);backdrop-filter:blur(20px) saturate(150%);-w
 }
 
 /* consolas en 3D: apoyadas sobre la mesa, con reflejo y giro según el mouse */
-.cimg{perspective:900px;perspective-origin:50% 30%}
-.cimg img{transform-style:preserve-3d;transform:rotateX(var(--rx,22deg)) rotateY(var(--ry,0deg)) translateZ(var(--tz,0px));transform-origin:50% 70%;
-  -webkit-box-reflect:below -6px linear-gradient(transparent 62%,rgba(255,255,255,.14));animation:cfloat 6s ease-in-out infinite}
+@property --rx{syntax:'<angle>';inherits:true;initial-value:30deg}
+@property --ry{syntax:'<angle>';inherits:true;initial-value:0deg}
+@property --sw{syntax:'<angle>';inherits:true;initial-value:0deg}
+.cimg{perspective:560px;perspective-origin:50% 20%;height:220px}
+.cimg img{transform-style:preserve-3d;transform:rotateX(var(--rx)) rotateY(calc(var(--ry) + var(--sw))) translateZ(var(--tz,0px));transform-origin:50% 75%;
+  -webkit-box-reflect:below -4px linear-gradient(transparent 55%,rgba(255,255,255,.2));animation:cfloat 6s ease-in-out infinite,csway 9s ease-in-out infinite;transition:--rx .6s cubic-bezier(.16,1,.3,1),--ry .6s cubic-bezier(.16,1,.3,1)}
+@keyframes csway{0%,100%{--sw:-9deg}50%{--sw:9deg}}
 @keyframes cfloat{0%,100%{translate:0 0}50%{translate:0 -5px}}
-.course.has-img:hover .cimg img{transform:rotateX(var(--rx,14deg)) rotateY(var(--ry,0deg)) translateZ(24px)}
-.cimg .glow{transform:scaleX(1.05)}
-@media (prefers-reduced-motion:reduce){.cimg img{animation:none;transform:rotateX(18deg)}}
+.course.has-img:hover .cimg img{--tz:46px;animation-play-state:running,paused}
+.cimg .glow{transform:scaleX(1.15);height:54px;bottom:2px;background:radial-gradient(closest-side,rgba(0,0,0,.85),rgba(196,154,108,.16) 70%,transparent)}
+@media (prefers-reduced-motion:reduce){.cimg img{animation:none;transform:rotateX(26deg)}}
 </style>
 <script>document.documentElement.classList.add('js')</script>
 </head>
@@ -375,7 +379,7 @@ header{background:rgba(10,10,10,.5);backdrop-filter:blur(20px) saturate(150%);-w
   /* consolas: giran hacia el mouse */
   [].forEach.call(document.querySelectorAll('.course.has-img'),function(el){var im=el.querySelector('.cimg img');if(!im)return;
     el.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
-      im.style.setProperty('--ry',(x*26).toFixed(1)+'deg');im.style.setProperty('--rx',(14+y*14).toFixed(1)+'deg')});
+      im.style.setProperty('--ry',(x*48).toFixed(1)+'deg');im.style.setProperty('--rx',(26+y*30).toFixed(1)+'deg')});
     el.addEventListener('pointerleave',function(){im.style.removeProperty('--ry');im.style.removeProperty('--rx')})});
   /* tarjetas en relieve */
   [].forEach.call(document.querySelectorAll('.course,.card'),function(el){
