@@ -174,6 +174,21 @@ header{background:rgba(10,10,10,.5);backdrop-filter:blur(20px) saturate(150%);-w
 .course,.card,.desk{background:linear-gradient(155deg,rgba(255,255,255,.07),rgba(255,255,255,.015) 45%,rgba(196,154,108,.04)),rgba(18,18,18,.5);backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);border-color:rgba(255,255,255,.09);box-shadow:inset 0 1px 0 rgba(255,255,255,.10),inset 0 -1px 0 rgba(0,0,0,.4),0 24px 60px -30px rgba(0,0,0,.8)}
 .course::before,.card::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;background:radial-gradient(240px circle at var(--gx,50%) var(--gy,0%),rgba(232,196,150,.85),rgba(196,154,108,.15) 45%,transparent 70%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.35;transition:opacity .3s}
 .course:hover::before,.card:hover::before{opacity:1}
+
+/* niveles de producción: un medidor que sube de 1 a 3 barras doradas */
+.lvl .rail{position:absolute;left:0;top:0;height:3px;border-radius:16px 0 0 0;background:var(--gold);width:33.4%;z-index:1}
+.lvl2 .rail{width:66.7%}.lvl3 .rail{width:100%;border-radius:16px 16px 0 0}
+.lvm{display:flex;align-items:center;gap:12px}
+.lvm .bars{display:flex;align-items:flex-end;gap:4px;height:26px}
+.lvm .bars i{display:block;width:7px;border-radius:2px;background:var(--line)}
+.lvm .bars i:nth-child(1){height:10px}.lvm .bars i:nth-child(2){height:18px}.lvm .bars i:nth-child(3){height:26px}
+.lvm .bars i.on{background:var(--gold)}
+.lvl3 .lvm .bars i.on{box-shadow:0 0 10px rgba(196,154,108,.55)}
+.lvm .lvt{display:flex;flex-direction:column;line-height:1.2}
+.lvm .lvt b{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.lvm .lvt small{font-size:13px;color:var(--muted)}
+.lvl3{border-color:rgba(196,154,108,.38)}
+.lvl3.course{background:linear-gradient(155deg,rgba(196,154,108,.14),rgba(255,255,255,.015) 50%,rgba(196,154,108,.06)),rgba(18,18,18,.5)}
 </style>
 <script>document.documentElement.classList.add('js')</script>
 </head>
@@ -220,13 +235,13 @@ header{background:rgba(10,10,10,.5);backdrop-filter:blur(20px) saturate(150%);-w
 <section class="block" id="cursos"><div class="wrap">
   <div class="rv head"><p class="eyebrow">Cursos</p><h2>Elige tu canal</h2><p class="lead">Dos caminos: la producción musical en la computadora y el sonido en vivo en la consola. Empiezas desde cero o desde donde estés.</p></div>
   <div class="courses">
-    <article class="rv course" id="c1"><div class="top"><span class="num">CH 01</span><span class="tag">6 meses</span></div><h3>Producción Musical · Básico</h3>
+    <article class="rv course lvl lvl1" id="c1"><span class="rail" aria-hidden="true"></span><div class="top"><span class="num">CH 01</span><span class="tag">6 meses</span></div><div class="lvm" aria-label="Nivel 1 de 3"><span class="bars" aria-hidden="true"><i class="on"></i><i class=""></i><i class=""></i></span><span class="lvt"><b>Nivel 1 · Fundamentos</b><small>Empiezas desde cero</small></span></div><h3>Producción Musical · Básico</h3>
       <p>Desde cero hasta tu primera canción terminada: el DAW, ritmo, MIDI, grabación, edición, mezcla y master.</p><p class="grad">Egresas como <b>Productor Musical</b></p>
       <div class="links"><a href="pensum/#basico">Ver pensum</a><a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Producci%C3%B3n%20Musical%20B%C3%A1sico" target="_blank" rel="noopener">Preguntar por este curso →</a></div></article>
-    <article class="rv course" id="c2"><div class="top"><span class="num">CH 02</span><span class="tag">6 meses</span></div><h3>Producción Musical · Intermedio</h3>
+    <article class="rv course lvl lvl2" id="c2"><span class="rail" aria-hidden="true"></span><div class="top"><span class="num">CH 02</span><span class="tag">6 meses</span></div><div class="lvm" aria-label="Nivel 2 de 3"><span class="bars" aria-hidden="true"><i class="on"></i><i class="on"></i><i class=""></i></span><span class="lvt"><b>Nivel 2 · Profesional</b><small>Ya produces y quieres sonar pro</small></span></div><h3>Producción Musical · Intermedio</h3>
       <p>Para quien ya produce y quiere sonar profesional: buses, procesamiento avanzado, síntesis, mezcla y masterización con identidad propia.</p><p class="grad">Egresas como <b>Productor Musical · Nivel Intermedio</b></p>
       <div class="links"><a href="pensum/#intermedio">Ver pensum</a><a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Producci%C3%B3n%20Musical%20Intermedio" target="_blank" rel="noopener">Preguntar por este curso →</a></div></article>
-    <article class="rv course" id="c3"><div class="top"><span class="num">CH 03</span><span class="tag">6 meses</span></div><h3>Producción Musical · Avanzado</h3>
+    <article class="rv course lvl lvl3" id="c3"><span class="rail" aria-hidden="true"></span><div class="top"><span class="num">CH 03</span><span class="tag">6 meses</span></div><div class="lvm" aria-label="Nivel 3 de 3"><span class="bars" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></span><span class="lvt"><b>Nivel 3 · Experto</b><small>Tu propio EP, de principio a fin</small></span></div><h3>Producción Musical · Avanzado</h3>
       <p>Produce tu propio EP de principio a fin: arreglo, sonido propio, voces comerciales, mezcla en Dolby Atmos, máster profesional y el negocio de la música.</p><p class="grad">Egresas como <b>Productor Musical · Nivel Avanzado</b></p>
       <div class="links"><a href="pensum/#avanzado">Ver pensum</a><a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Producci%C3%B3n%20Musical%20Avanzado" target="_blank" rel="noopener">Preguntar por este curso →</a></div></article>
     <article class="rv course" id="c4"><div class="top"><span class="num">CH 04</span><span class="tag">3 meses · 12 clases</span></div><h3>Audio en Vivo · Básico</h3>
