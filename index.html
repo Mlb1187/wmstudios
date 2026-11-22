@@ -218,6 +218,17 @@ header{background:rgba(10,10,10,.5);backdrop-filter:blur(20px) saturate(150%);-w
 .course.has-img:hover .cimg img{--tz:46px;animation-play-state:running,paused}
 .cimg .glow{transform:scaleX(1.15);height:54px;bottom:2px;background:radial-gradient(closest-side,rgba(0,0,0,.85),rgba(196,154,108,.16) 70%,transparent)}
 @media (prefers-reduced-motion:reduce){.cimg img{animation:none;transform:rotateX(26deg)}}
+
+/* varias consolas en una misma foto */
+.cimg.duo img+img,.cimg.trio img+img{margin-left:-14%}
+.cimg.duo img{max-width:56%;max-height:120px}
+.cimg.duo img:first-of-type{--sw0:14deg}.cimg.duo img:last-of-type{--sw0:-14deg}
+.cimg.trio img{max-width:44%;max-height:96px}
+.cimg.trio img:nth-of-type(1){--sw0:18deg;translate:0 10px}
+.cimg.trio img:nth-of-type(2){z-index:2;max-height:110px;--sw0:0deg}
+.cimg.trio img:nth-of-type(3){--sw0:-18deg;translate:0 10px}
+.cimg.duo img,.cimg.trio img{transform:rotateX(var(--rx)) rotateY(calc(var(--ry) + var(--sw) + var(--sw0,0deg))) translateZ(var(--tz,0px));animation:csway 9s ease-in-out infinite}
+@media (min-width:981px){.courses .course.has-img:last-child:nth-child(3n+1) .cimg.duo img{max-height:170px;max-width:50%}}
 </style>
 <script>document.documentElement.classList.add('js')</script>
 </head>
@@ -277,13 +288,13 @@ header{background:rgba(10,10,10,.5);backdrop-filter:blur(20px) saturate(150%);-w
     <article class="rv course" id="c4"><div class="top"><span class="num">CH 04</span><span class="tag">3 meses · 12 clases</span></div><h3>Audio en Vivo · Básico</h3>
       <p>Las bases del sonido en tarima: micrófonos, cables, consola analógica, monitores, feedback y la prueba de sonido de una banda.</p><p class="grad">Egresas como <b>Asistente de Sonido en Vivo</b></p>
       <div class="links"><a href="pensum/#envivo">Ver pensum</a><a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Audio%20en%20Vivo%20B%C3%A1sico" target="_blank" rel="noopener">Preguntar por este curso →</a></div></article>
-    <article class="rv course has-img" id="c5"><figure class="cimg"><span class="glow" aria-hidden="true"></span><span class="stripe" aria-hidden="true"></span><img src="img/consola-m32.webp" alt="Consola digital Midas M32" loading="lazy" decoding="async"></figure><div class="top"><span class="num">CH 05</span><span class="tag">6 meses</span></div><h3>Consola Digital en Vivo</h3>
+    <article class="rv course has-img" id="c5"><figure class="cimg trio"><span class="glow" aria-hidden="true"></span><span class="stripe" aria-hidden="true"></span><img src="img/consola-x32.webp" alt="Consola Behringer X32" loading="lazy" decoding="async"><img src="img/consola-wing.webp" alt="Consola Behringer WING" loading="lazy" decoding="async"><img src="img/consola-m32.webp" alt="Consola Midas M32" loading="lazy" decoding="async"></figure><div class="top"><span class="num">CH 05</span><span class="tag">6 meses</span></div><h3>Consola Digital en Vivo</h3>
       <p>Opera consolas digitales Behringer y Midas en 4 fases: fundamentos, mezcla, sistemas y producción de un show.</p><p class="grad">Egresas como <b>Técnico en Consola Digital en Vivo</b></p>
       <div class="links"><a href="pensum/#consola">Ver pensum</a><a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Consola%20Digital%20en%20Vivo" target="_blank" rel="noopener">Preguntar por este curso →</a></div></article>
     <article class="rv course has-img" id="c6"><figure class="cimg"><span class="glow" aria-hidden="true"></span><span class="stripe" aria-hidden="true"></span><img src="img/consola-wing.webp" alt="Consola Behringer WING" loading="lazy" decoding="async"></figure><div class="top"><span class="num">CH 06</span><span class="tag">3 meses · 12 clases</span></div><h3>Consola Behringer WING</h3>
       <p>Dominio completo de la WING: ruteo, monitores, efectos, escenas, grabación y virtual soundcheck.</p><p class="grad">Egresas como <b>Operador de Consola Behringer WING</b></p>
       <div class="links"><a href="pensum/#wing">Ver pensum</a><a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Consola%20WING" target="_blank" rel="noopener">Preguntar por este curso →</a></div></article>
-    <article class="rv course has-img" id="c7"><figure class="cimg"><span class="glow" aria-hidden="true"></span><span class="stripe" aria-hidden="true"></span><img src="img/consola-x32.webp" alt="Consola Behringer X32" loading="lazy" decoding="async"></figure><div class="top"><span class="num">CH 07</span><span class="tag">3 meses · 12 clases</span></div><h3>Consola X32 / Midas M32</h3>
+    <article class="rv course has-img" id="c7"><figure class="cimg duo"><span class="glow" aria-hidden="true"></span><span class="stripe" aria-hidden="true"></span><img src="img/consola-x32.webp" alt="Consola Behringer X32" loading="lazy" decoding="async"><img src="img/consola-m32.webp" alt="Consola Midas M32" loading="lazy" decoding="async"></figure><div class="top"><span class="num">CH 07</span><span class="tag">3 meses · 12 clases</span></div><h3>Consola X32 / Midas M32</h3>
       <p>Una de las consolas más usadas en tarima, de punta a punta: canal, mix buses, efectos, escenas, grabación y prácticas de show.</p><p class="grad">Egresas como <b>Operador de Consola X32 / M32</b></p>
       <div class="links"><a href="pensum/#x32">Ver pensum</a><a href="https://wa.me/584149668456?text=Hola%2C%20quiero%20informaci%C3%B3n%20del%20curso%20de%20Consola%20X32%20%2F%20M32" target="_blank" rel="noopener">Preguntar por este curso →</a></div></article>
   </div>
@@ -377,7 +388,7 @@ header{background:rgba(10,10,10,.5);backdrop-filter:blur(20px) saturate(150%);-w
   var meters=[].slice.call(desk.querySelectorAll('.meter i'));var lv=meters.map(function(){return .3});
   setInterval(function(){meters.forEach(function(m,i){var cap=caps[i];var base=1-(parseFloat(cap.style.top)||0)/(cap.parentNode.clientHeight||200);var tgt=Math.max(.05,Math.min(1,base*.85+Math.random()*.25-.08));lv[i]+=(tgt-lv[i])*(tgt>lv[i]?.8:.25);m.style.setProperty('--lv',lv[i].toFixed(3))})},110);
   /* consolas: giran hacia el mouse */
-  [].forEach.call(document.querySelectorAll('.course.has-img'),function(el){var im=el.querySelector('.cimg img');if(!im)return;
+  [].forEach.call(document.querySelectorAll('.course.has-img'),function(el){var ims=[].slice.call(el.querySelectorAll('.cimg img'));if(!ims.length)return;var im={style:{setProperty:function(k,v){ims.forEach(function(i){i.style.setProperty(k,v)})},removeProperty:function(k){ims.forEach(function(i){i.style.removeProperty(k)})}}};
     el.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
       im.style.setProperty('--ry',(x*48).toFixed(1)+'deg');im.style.setProperty('--rx',(26+y*30).toFixed(1)+'deg')});
     el.addEventListener('pointerleave',function(){im.style.removeProperty('--ry');im.style.removeProperty('--rx')})});
