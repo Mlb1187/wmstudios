@@ -42,6 +42,12 @@ label{font-size:14px;font-weight:600;color:var(--muted)}
 .or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px;margin:0}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
 .gbox{min-height:44px;display:flex;justify-content:center}
 .hint{font-size:13px;color:var(--muted);margin:0}
+.acct{display:flex;align-items:center;gap:10px;min-width:0}
+#who{color:var(--muted);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.out-btn{min-height:40px;padding:8px 16px;font-size:14px;border-color:rgba(196,154,108,.55);color:var(--ink);background:var(--raised2);white-space:nowrap}
+.out-btn:hover{border-color:var(--gold);color:var(--gold)}
+.out-btn svg{width:16px;height:16px;flex:none}
+@media (max-width:520px){#who{display:none}}
 .note{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:24px;padding:14px 16px;border:1px solid rgba(196,154,108,.4);border-radius:14px;background:var(--raised)}
 .note p{margin:0;font-size:14px;color:var(--muted)}.note b{color:var(--ink)}
 .msg{min-height:22px;font-size:14px;margin:0}
@@ -82,7 +88,7 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-si
 </head>
 <body>
 <div class="wrap">
-  <header><img src="../img/wm-logo-blanco.png" alt="WM Studios"><span id="who" class="muted" style="font-size:14px"></span></header>
+  <header><img src="../img/wm-logo-blanco.png" alt="WM Studios"><div class="acct"><span id="who"></span><span id="hbtn"></span></div></header>
   <main id="app"><div class="spin" role="status" aria-label="Cargando"></div></main>
   <footer><span>WM Studios · Av. 20 con 5 de Julio, Maracaibo · <a href="../privacidad/">Privacidad</a></span><span id="out"></span></footer>
 </div>
@@ -107,7 +113,7 @@ async function api(action,body){
 
 /* ---------- entrar ---------- */
 const GCID=window.WM_GOOGLE_CLIENT_ID||'';
-function clearTop(){document.getElementById('who').textContent='';document.getElementById('out').innerHTML=''}
+function clearTop(){document.getElementById('who').textContent='';document.getElementById('out').innerHTML='';document.getElementById('hbtn').innerHTML=''}
 function pwField(id,label,ac){return `<label for="${id}">${label}</label><div class="pw"><input id="${id}" type="password" autocomplete="${ac}" required><button class="eye" type="button" data-eye="${id}">Mostrar</button></div>`}
 function wireEyes(){app.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{const i=document.getElementById(b.dataset.eye);const sh=i.type==='password';i.type=sh?'text':'password';b.textContent=sh?'Ocultar':'Mostrar'})}
 function err(m,t){m.className='msg err';m.textContent=t}
@@ -239,8 +245,10 @@ function viewPortal(d){
   setTimeout(()=>{const mk=document.getElementById('mk');if(mk)mk.onclick=()=>viewSetPass('opt')},0);
   const first=String(d.name||'').split(' ')[0];
   document.getElementById('who').textContent=d.name||'';
-  document.getElementById('out').innerHTML=(d.hasPassword===undefined?'':'<button class="link" id="cp" style="margin-right:18px">'+(d.hasPassword?'Cambiar clave':'Crear clave')+'</button>')+'<button class="link" id="lo">Cerrar sesión</button>';
-  document.getElementById('lo').onclick=async()=>{const s=ses;save(null);viewLogin('',s&&s.email);try{await api('salir',s)}catch(e){}};
+  document.getElementById('out').innerHTML=(d.hasPassword===undefined?'':'<button class="link" id="cp" style="margin-right:18px">'+(d.hasPassword?'Cambiar clave':'Crear clave')+'</button>')+'<button class="link" id="lo2">Cerrar sesión</button>';
+  document.getElementById('hbtn').innerHTML='<button class="out-btn" id="lo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Cerrar sesión</button>';
+  const logout=async()=>{const s=ses;save(null);viewLogin('',s&&s.email);try{await api('salir',s)}catch(e){}};
+  document.getElementById('lo').onclick=logout;document.getElementById('lo2').onclick=logout;
   const cpb=document.getElementById('cp');if(cpb)cpb.onclick=()=>viewSetPass('opt');
   const courses=d.courses||[];
   app.innerHTML=`<section class="hero"><p class="eyebrow">Portal de alumnos</p><h1>Hola, ${esc(first)}</h1>
