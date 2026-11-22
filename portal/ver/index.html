@@ -10,6 +10,7 @@
 html,body{margin:0;height:100%;background:#0A0A0A;color:#F4F2EE;font:500 15px/1.5 Inter,system-ui,Arial,sans-serif}
 .bar{position:fixed;inset:0 0 auto;height:48px;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;background:#0A0A0A;border-bottom:1px solid #2E2E2E}
 .bar a{color:#C49A6C;text-decoration:none;font-weight:700}
+.bar .l{display:flex;align-items:center;gap:16px;flex:none}.bar .logo img{height:18px;width:auto;display:block}
 .bar span{color:#A3A3A3;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 iframe{position:fixed;top:48px;left:0;width:100%;height:calc(100% - 48px);border:0;background:#0A0A0A}
 .wm{position:fixed;right:12px;bottom:10px;z-index:3;pointer-events:none;font-size:12px;color:rgba(244,242,238,.35)}
@@ -20,7 +21,7 @@ iframe{position:fixed;top:48px;left:0;width:100%;height:calc(100% - 48px);border
 </style>
 </head>
 <body>
-<div class="bar"><a href="../">← Mi portal</a><span id="who"></span></div>
+<div class="bar"><span class="l"><a class="logo" href="../../" aria-label="WM Studios, ir al inicio"><img src="../../img/wm-logo-blanco.png" alt="WM Studios"></a><a href="../">← Mi portal</a></span><span id="who"></span></div>
 <div id="app"><div class="spin" role="status" aria-label="Cargando"></div></div>
 <script src="../config.js"></script>
 <script>
