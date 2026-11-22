@@ -7,7 +7,7 @@
 <meta name="description" content="Material de apoyo de tus clases en WM Studios.">
 <meta name="robots" content="noindex">
 <meta property="og:title" content="Portal de alumnos · WM Studios">
-<meta property="og:description" content="Entra con tu correo y mira el material de tus clases.">
+<meta property="og:description" content="Entra con tu correo y tu clave, o con Google, y mira el material de tus clases.">
 <meta property="og:image" content="https://wmstudio.academy/img/clase.jpg">
 <meta name="theme-color" content="#0A0A0A">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,6 +36,14 @@ label{font-size:14px;font-weight:600;color:var(--muted)}
 .login{max-width:440px;margin:48px auto 0;display:flex;flex-direction:column;gap:20px}
 .login form{display:flex;flex-direction:column;gap:12px}
 .code{letter-spacing:.4em;font-size:28px;font-weight:700;text-align:center}
+.pw{position:relative}.pw input{padding-right:84px}
+.pw .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);min-height:36px;padding:6px 12px;font-size:13px;background:none;border:0;color:var(--muted)}
+.pw .eye:hover{color:var(--ink)}
+.or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px;margin:0}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.gbox{min-height:44px;display:flex;justify-content:center}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.note{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:24px;padding:14px 16px;border:1px solid rgba(196,154,108,.4);border-radius:14px;background:var(--raised)}
+.note p{margin:0;font-size:14px;color:var(--muted)}.note b{color:var(--ink)}
 .msg{min-height:22px;font-size:14px;margin:0}
 .msg.err{color:#E8B4A0}
 .hero{display:flex;flex-direction:column;gap:12px;padding:36px 0 8px}
@@ -98,33 +106,119 @@ async function api(action,body){
 }
 
 /* ---------- entrar ---------- */
-function viewEmail(msg,email){
-  document.getElementById('who').textContent='';document.getElementById('out').innerHTML='';
+const GCID=window.WM_GOOGLE_CLIENT_ID||'';
+function clearTop(){document.getElementById('who').textContent='';document.getElementById('out').innerHTML=''}
+function pwField(id,label,ac){return `<label for="${id}">${label}</label><div class="pw"><input id="${id}" type="password" autocomplete="${ac}" required><button class="eye" type="button" data-eye="${id}">Mostrar</button></div>`}
+function wireEyes(){app.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{const i=document.getElementById(b.dataset.eye);const sh=i.type==='password';i.type=sh?'text':'password';b.textContent=sh?'Ocultar':'Mostrar'})}
+function err(m,t){m.className='msg err';m.textContent=t}
+function busy(b,on,txt){b.disabled=on;b.textContent=txt}
+const validEmail=e=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
+function passProblem(a,b){if(a.length<8)return 'La clave debe tener al menos 8 caracteres.';if(!/[A-Za-z]/.test(a)||!/[0-9]/.test(a))return 'Usa letras y números en tu clave.';if(a!==b)return 'Las dos claves no coinciden.';return ''}
+
+/* Google: carga su script solo si hay ID de cliente. */
+let gisP=null;
+function gis(){if(!GCID)return Promise.reject();if(!gisP)gisP=new Promise((ok,no)=>{const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.async=true;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});return gisP}
+function googleButton(box,m){
+  gis().then(()=>{google.accounts.id.initialize({client_id:GCID,callback:async res=>{m.className='msg';m.textContent='Entrando con Google…';
+      try{const r=await api('google',{credential:res.credential});if(r.ok){save({email:r.email,token:r.token});load()}else err(m,r.error)}catch(x){err(m,'No hay conexión. Inténtalo de nuevo.')}},
+    ux_mode:'popup',cancel_on_tap_outside:true});
+    google.accounts.id.renderButton(box,{theme:'filled_black',size:'large',shape:'pill',text:'signin_with',locale:'es',width:Math.min(400,box.clientWidth||320)})})
+  .catch(()=>{box.innerHTML='<p class="hint">No se pudo cargar el botón de Google. Entra con tu correo y tu clave.</p>'})}
+
+function viewLogin(msg,email){
+  clearTop();
   app.innerHTML=`<section class="login">
     <div><p class="eyebrow">Portal de alumnos</p><h1 style="margin-top:10px">Tu material de clase</h1></div>
-    <p class="muted" style="margin:0">Escribe el correo con el que te inscribiste. Te enviaremos un código de 6 dígitos.</p>
+    ${GCID?`<div class="gbox" id="gb"></div><p class="or">o con tu correo</p>`:''}
     <form id="f1" novalidate><label for="em">Correo</label><input id="em" type="email" autocomplete="email" inputmode="email" required value="${esc(email||'')}" placeholder="tucorreo@gmail.com">
-    <button class="primary" id="b1" type="submit">Enviarme el código</button><p class="msg ${msg?'err':''}" id="m1" role="alert">${esc(msg||'')}</p></form></section>`;
-  const f=document.getElementById('f1'),em=document.getElementById('em'),b=document.getElementById('b1'),m=document.getElementById('m1');
-  em.focus();
-  f.onsubmit=async ev=>{ev.preventDefault();const e=em.value.trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){m.className='msg err';m.textContent='Escribe un correo válido.';return}
-    b.disabled=true;b.textContent='Enviando…';m.textContent='';
-    try{const r=await api('pedirCodigo',{email:e});if(r.ok)viewCode(e);else{m.className='msg err';m.textContent=r.error;b.disabled=false;b.textContent='Enviarme el código'}}
-    catch(x){m.className='msg err';m.textContent='No hay conexión. Inténtalo de nuevo.';b.disabled=false;b.textContent='Enviarme el código'}};
+    ${pwField('pw','Clave','current-password')}
+    <button class="primary" id="b1" type="submit">Entrar</button><p class="msg ${msg?'err':''}" id="m1" role="alert">${esc(msg||'')}</p>
+    <p class="hint">¿Primera vez? Usa la clave temporal que te dio la academia; al entrar crearás la tuya.</p>
+    <button class="link" type="button" id="fg">¿Olvidaste tu clave?</button></form></section>`;
+  const f=document.getElementById('f1'),em=document.getElementById('em'),pw=document.getElementById('pw'),b=document.getElementById('b1'),m=document.getElementById('m1');
+  wireEyes();(email?pw:em).focus();
+  if(GCID)googleButton(document.getElementById('gb'),m);
+  document.getElementById('fg').onclick=()=>viewRecover(em.value.trim().toLowerCase());
+  f.onsubmit=async ev=>{ev.preventDefault();const e=em.value.trim().toLowerCase();if(!validEmail(e))return err(m,'Escribe un correo válido.');if(!pw.value)return err(m,'Escribe tu clave.');
+    busy(b,true,'Entrando…');m.textContent='';
+    try{const r=await api('login',{email:e,password:pw.value});
+      if(r.ok){save({email:e,token:r.token});r.mustChange?viewSetPass('must'):load();return}
+      if(r.error==='Acción desconocida.'){legacyEmail(e);return}   /* servidor todavía sin actualizar */
+      err(m,r.error);busy(b,false,'Entrar');pw.select()}
+    catch(x){err(m,'No hay conexión. Inténtalo de nuevo.');busy(b,false,'Entrar')}};
 }
-function viewCode(email){
+
+/* Recuperar: código al correo + clave nueva. */
+function viewRecover(email){
+  clearTop();
   app.innerHTML=`<section class="login">
-    <div><p class="eyebrow">Revisa tu correo</p><h1 style="margin-top:10px">Escribe el código</h1></div>
-    <p class="muted" style="margin:0">Lo enviamos a <b style="color:var(--ink)">${esc(email)}</b>. Vence en 10 minutos. Si no llega, revisa spam.</p>
+    <div><p class="eyebrow">Recuperar acceso</p><h1 style="margin-top:10px">Crea una clave nueva</h1></div>
+    <p class="muted" style="margin:0">Te enviaremos un código de 6 dígitos al correo con el que te inscribiste.</p>
+    <form id="f1" novalidate><label for="em">Correo</label><input id="em" type="email" autocomplete="email" inputmode="email" required value="${esc(email||'')}" placeholder="tucorreo@gmail.com">
+    <button class="primary" id="b1" type="submit">Enviarme el código</button><p class="msg" id="m1" role="alert"></p>
+    <button class="link" type="button" id="bk">Volver a entrar con mi clave</button></form></section>`;
+  const f=document.getElementById('f1'),em=document.getElementById('em'),b=document.getElementById('b1'),m=document.getElementById('m1');
+  em.focus();document.getElementById('bk').onclick=()=>viewLogin('',em.value.trim().toLowerCase());
+  f.onsubmit=async ev=>{ev.preventDefault();const e=em.value.trim().toLowerCase();if(!validEmail(e))return err(m,'Escribe un correo válido.');
+    busy(b,true,'Enviando…');m.textContent='';
+    try{const r=await api('pedirCodigo',{email:e});if(r.ok)viewRecoverCode(e);else{err(m,r.error);busy(b,false,'Enviarme el código')}}
+    catch(x){err(m,'No hay conexión. Inténtalo de nuevo.');busy(b,false,'Enviarme el código')}};
+}
+function viewRecoverCode(email){
+  app.innerHTML=`<section class="login">
+    <div><p class="eyebrow">Revisa tu correo</p><h1 style="margin-top:10px">Código y clave nueva</h1></div>
+    <p class="muted" style="margin:0">Enviamos el código a <b style="color:var(--ink)">${esc(email)}</b>. Vence en 10 minutos. Si no llega, revisa spam.</p>
     <form id="f2" novalidate><label for="cd">Código de 6 dígitos</label><input id="cd" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" required>
-    <button class="primary" id="b2" type="submit">Entrar</button><p class="msg" id="m2" role="alert"></p>
-    <button class="link" type="button" id="back">Usar otro correo o pedir otro código</button></form></section>`;
-  const f=document.getElementById('f2'),cd=document.getElementById('cd'),b=document.getElementById('b2'),m=document.getElementById('m2');
-  cd.focus();cd.oninput=()=>{cd.value=cd.value.replace(/\D/g,'').slice(0,6);if(cd.value.length===6)f.requestSubmit()};
-  document.getElementById('back').onclick=()=>viewEmail('',email);
-  f.onsubmit=async ev=>{ev.preventDefault();if(cd.value.length!==6||b.disabled)return;b.disabled=true;b.textContent='Entrando…';m.textContent='';
-    try{const r=await api('entrar',{email,code:cd.value});if(r.ok){save({email,token:r.token});load()}else{m.className='msg err';m.textContent=r.error;b.disabled=false;b.textContent='Entrar';cd.select()}}
-    catch(x){m.className='msg err';m.textContent='No hay conexión. Inténtalo de nuevo.';b.disabled=false;b.textContent='Entrar'}};
+    ${pwField('p1','Clave nueva','new-password')}${pwField('p2','Repite la clave','new-password')}
+    <p class="hint">Mínimo 8 caracteres, con letras y números.</p>
+    <button class="primary" id="b2" type="submit">Guardar y entrar</button><p class="msg" id="m2" role="alert"></p>
+    <button class="link" type="button" id="bk">Pedir otro código</button></form></section>`;
+  const f=document.getElementById('f2'),cd=document.getElementById('cd'),p1=document.getElementById('p1'),p2=document.getElementById('p2'),b=document.getElementById('b2'),m=document.getElementById('m2');
+  wireEyes();cd.focus();cd.oninput=()=>{cd.value=cd.value.replace(/\D/g,'').slice(0,6);if(cd.value.length===6)p1.focus()};
+  document.getElementById('bk').onclick=()=>viewRecover(email);
+  f.onsubmit=async ev=>{ev.preventDefault();if(cd.value.length!==6)return err(m,'Escribe el código de 6 dígitos.');const pr=passProblem(p1.value,p2.value);if(pr)return err(m,pr);
+    busy(b,true,'Guardando…');m.textContent='';
+    try{const r=await api('recuperar',{email,code:cd.value,password:p1.value});if(r.ok){save({email,token:r.token});load()}else{err(m,r.error);busy(b,false,'Guardar y entrar')}}
+    catch(x){err(m,'No hay conexión. Inténtalo de nuevo.');busy(b,false,'Guardar y entrar')}};
+}
+
+/* Crear o cambiar la clave con la sesión abierta. mode: 'must' (después de la clave temporal) u 'opt'. */
+function viewSetPass(mode){
+  clearTop();
+  app.innerHTML=`<section class="login">
+    <div><p class="eyebrow">${mode==='must'?'Último paso':'Tu clave'}</p><h1 style="margin-top:10px">${mode==='must'?'Crea tu propia clave':'Crea o cambia tu clave'}</h1></div>
+    <p class="muted" style="margin:0">${mode==='must'?'Entraste con una clave temporal. Crea la tuya para seguir; la temporal dejará de funcionar.':'Con ella entras con tu correo, sin depender de Google.'}</p>
+    <form id="f3" novalidate>${pwField('p1','Clave nueva','new-password')}${pwField('p2','Repite la clave','new-password')}
+    <p class="hint">Mínimo 8 caracteres, con letras y números.</p>
+    <button class="primary" id="b3" type="submit">Guardar clave</button><p class="msg" id="m3" role="alert"></p>
+    ${mode==='must'?'':'<button class="link" type="button" id="bk">Volver a mi material</button>'}</form></section>`;
+  const f=document.getElementById('f3'),p1=document.getElementById('p1'),p2=document.getElementById('p2'),b=document.getElementById('b3'),m=document.getElementById('m3');
+  wireEyes();p1.focus();const bk=document.getElementById('bk');if(bk)bk.onclick=load;
+  f.onsubmit=async ev=>{ev.preventDefault();const pr=passProblem(p1.value,p2.value);if(pr)return err(m,pr);
+    busy(b,true,'Guardando…');m.textContent='';
+    try{const r=await api('cambiarClave',{email:ses.email,token:ses.token,password:p1.value});
+      if(r.ok){load();return}if(r.auth===false){save(null);viewLogin(r.error,ses&&ses.email);return}err(m,r.error);busy(b,false,'Guardar clave')}
+    catch(x){err(m,'No hay conexión. Inténtalo de nuevo.');busy(b,false,'Guardar clave')}};
+}
+
+/* Entrada anterior con código (solo mientras el servidor no esté actualizado). */
+function legacyEmail(email){
+  clearTop();
+  app.innerHTML=`<section class="login"><div><p class="eyebrow">Portal de alumnos</p><h1 style="margin-top:10px">Entra con un código</h1></div>
+    <p class="muted" style="margin:0">Estamos actualizando el portal. Por ahora te enviaremos un código de 6 dígitos a tu correo.</p>
+    <form id="f1" novalidate><label for="em">Correo</label><input id="em" type="email" autocomplete="email" inputmode="email" required value="${esc(email||'')}">
+    <button class="primary" id="b1" type="submit">Enviarme el código</button><p class="msg" id="m1" role="alert"></p></form></section>`;
+  const f=document.getElementById('f1'),em=document.getElementById('em'),b=document.getElementById('b1'),m=document.getElementById('m1');
+  f.onsubmit=async ev=>{ev.preventDefault();const e=em.value.trim().toLowerCase();if(!validEmail(e))return err(m,'Escribe un correo válido.');busy(b,true,'Enviando…');
+    try{const r=await api('pedirCodigo',{email:e});if(r.ok)legacyCode(e);else{err(m,r.error);busy(b,false,'Enviarme el código')}}catch(x){err(m,'No hay conexión.');busy(b,false,'Enviarme el código')}};
+}
+function legacyCode(email){
+  app.innerHTML=`<section class="login"><div><p class="eyebrow">Revisa tu correo</p><h1 style="margin-top:10px">Escribe el código</h1></div>
+    <form id="f2" novalidate><label for="cd">Código de 6 dígitos</label><input id="cd" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
+    <button class="primary" id="b2" type="submit">Entrar</button><p class="msg" id="m2" role="alert"></p></form></section>`;
+  const f=document.getElementById('f2'),cd=document.getElementById('cd'),b=document.getElementById('b2'),m=document.getElementById('m2');cd.focus();
+  f.onsubmit=async ev=>{ev.preventDefault();busy(b,true,'Entrando…');
+    try{const r=await api('entrar',{email,code:cd.value.trim()});if(r.ok){save({email,token:r.token});load()}else{err(m,r.error);busy(b,false,'Entrar')}}catch(x){err(m,'No hay conexión.');busy(b,false,'Entrar')}};
 }
 
 /* ---------- contenido ---------- */
@@ -142,10 +236,12 @@ function clsCard(c,open){
   </div></details>`;
 }
 function viewPortal(d){
+  setTimeout(()=>{const mk=document.getElementById('mk');if(mk)mk.onclick=()=>viewSetPass('opt')},0);
   const first=String(d.name||'').split(' ')[0];
   document.getElementById('who').textContent=d.name||'';
-  document.getElementById('out').innerHTML='<button class="link" id="lo">Cerrar sesión</button>';
-  document.getElementById('lo').onclick=async()=>{const s=ses;save(null);viewEmail();try{await api('salir',s)}catch(e){}};
+  document.getElementById('out').innerHTML=(d.hasPassword===undefined?'':'<button class="link" id="cp" style="margin-right:18px">'+(d.hasPassword?'Cambiar clave':'Crear clave')+'</button>')+'<button class="link" id="lo">Cerrar sesión</button>';
+  document.getElementById('lo').onclick=async()=>{const s=ses;save(null);viewLogin('',s&&s.email);try{await api('salir',s)}catch(e){}};
+  const cpb=document.getElementById('cp');if(cpb)cpb.onclick=()=>viewSetPass('opt');
   const courses=d.courses||[];
   app.innerHTML=`<section class="hero"><p class="eyebrow">Portal de alumnos</p><h1>Hola, ${esc(first)}</h1>
     <p class="muted" style="margin:0">${d.admin?'Vista de administrador: ves todos los cursos y todo el material, tal como lo verá cada alumno al avanzar.':'Aquí está el material de las clases que ya viste. Cada clase nueva se abre después de verla con tu profesor.'}</p></section>`+
@@ -155,12 +251,13 @@ function viewPortal(d){
         ${(c.material||[]).length?`<div class="cls"><div class="body"><p class="lbl">Material del curso</p><div class="mats">${c.material.map(m=>`<a class="mat" href="${esc(matHref(m.url))}"${matAttrs(m.url)}><span class="ic">${kindOf(m.url)}</span><span>${esc(m.title)}</span></a>`).join('')}</div></div></div>`:''}
         ${c.hasta?'':'<div class="box">El material de cada clase aparecerá aquí después de verla.</div>'}
         ${c.classes.map(x=>clsCard(x,x.n===c.hasta)).join('')}</section>`}).join('')+
+    (d.hasPassword===false?`<div class="note"><p><b>Entraste con Google.</b> Si quieres, crea una clave para entrar también con tu correo.</p><button id="mk">Crear clave</button></div>`:'')+
     (d.updatedAt?`<p class="muted" style="font-size:13px;margin-top:28px">Actualizado el ${esc(new Date(d.updatedAt).toLocaleDateString('es-VE',{day:'numeric',month:'long'}))}.</p>`:'');
 }
 async function load(){
-  if(!ses||!ses.token){viewEmail();return}
+  if(!ses||!ses.token){viewLogin();return}
   app.innerHTML='<div class="spin" role="status" aria-label="Cargando"></div>';
-  try{const r=await api('portal',ses);if(r.ok)viewPortal(r);else{if(r.auth===false)save(null);viewEmail(r.error,ses&&ses.email)}}
+  try{const r=await api('portal',ses);if(r.ok)viewPortal(r);else if(r.mustChange)viewSetPass('must');else{if(r.auth===false)save(null);viewLogin(r.error,ses&&ses.email)}}
   catch(e){app.innerHTML='<div class="empty"><p>No pudimos conectar. Revisa tu internet.</p><button id="rt">Reintentar</button></div>';document.getElementById('rt').onclick=load}
 }
 if(API_URL.startsWith('PEGA_'))app.innerHTML='<div class="empty">El portal aún no está conectado.</div>';else load();

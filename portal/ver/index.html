@@ -30,7 +30,7 @@ iframe{position:fixed;top:48px;left:0;width:100%;height:calc(100% - 48px);border
   const out=m=>{app.innerHTML=`<div class="msg"><p>${esc(m)}</p><a href="../">Ir a mi portal</a></div>`};
   let ses=null;try{ses=JSON.parse(localStorage.getItem('wm-portal')||'null')}catch(e){}
   const id=decodeURIComponent(location.hash.slice(1));
-  if(!ses||!ses.token)return out('Este material es exclusivo para alumnos activos. Entra a tu portal con tu correo y tu código.');
+  if(!ses||!ses.token)return out('Este material es exclusivo para alumnos activos. Entra a tu portal con tu correo y tu clave.');
   if(!/^[a-z0-9-]{1,60}$/.test(id))return out('Material no encontrado.');
   const API=window.WM_API||'';if(!API||API.startsWith('PEGA_'))return out('El portal aún no está conectado.');
   document.getElementById('who').textContent=ses.email;
